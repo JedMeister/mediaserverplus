@@ -1,0 +1,13 @@
+#include <turnkey/base>
+#include <turnkey/samba>
+#include <turnkey/samba-dav>
+#include <turnkey/compression>
+#include <turnkey/nfs>
+
+php5-ssh2
+sudo
+
+python-requests  /* Emby dependency*/
+mediainfo        /* Emby dependency*/
+libsqlite3-dev	 /* Emby dependency*/
+

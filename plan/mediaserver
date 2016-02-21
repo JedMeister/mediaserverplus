@@ -1,0 +1,15 @@
+#include <turnkey/base>
+#include <turnkey/samba>
+#include <turnkey/samba-dav>
+#include <turnkey/compression>
+#include <turnkey/nfs>
+
+netcat
+
+clamav-daemon
+clamdscan
+
+rtorrent
+tmux
+mediainfo
+libav-tools
