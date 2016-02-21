@@ -1,0 +1,8 @@
+jedix-mediaserverplus-14.1 (1) UNRELEASED; urgency=low
+
+  * Initial release of Media Server Plus
+
+  * Pre-builds some appliance buildcode from mediaserver and torrentserver 
+    appliances.
+
+ -- Jeremy Davis <jeremy@turnkeylinux.org>  Sun, 21 Feb 2016 16:35:23 +1100
