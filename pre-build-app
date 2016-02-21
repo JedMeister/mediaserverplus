@@ -15,12 +15,10 @@ REPO=$(pwd)
 mkdir -p $PWD/conf.d/{torrentserver,mediaserver}
 
 cd $MS_REPO
-cp plan/main $REPO/plan/torrentserver
 cp conf.d/* $REPO/conf.d/torrentserver
 cp -R overlay $REPO
 
 cd $TS_REPO
-cp plan/main $REPO/plan/mediaserver
 cp conf.d/* $REPO/conf.d/mediaserver
 cp -R overlay $REPO
 
