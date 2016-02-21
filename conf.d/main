@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+run_scripts() {
+    for script in "$1"/* ; do
+        if [[ -x "$script" ]]; then
+            "$script"
+        fi
+    done
+}
+
+run_scripts torrentserver
+run_scripts mediaserver
