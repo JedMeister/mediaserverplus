@@ -4,24 +4,16 @@ fatal() { echo "FATAL [$(basename $0)]: $@" 1>&2; exit 1; }
 warning() { echo "WARNING [$(basename $0)]: $@"; }
 info() { echo "INFO [$(basename $0)]: $@"; }
 
-MS_REPO=$FAB_PATH/products/mediaserver
-TS_REPO=$FAB_PATH/products/torrentserver
+copy_app() {
+    REPO=$FAB_PATH/products/$1
+    [ -d "$REPO" ] || fatal "$REPO doesn't exist"
+    cp $REPO/conf.d/downloads conf.d/$1-downloads
+    cp $REPO/conf.d/main conf.d/$1-main
+    cp -R $REPO/overlay .
+}
 
-REPO=$(pwd)
+copy_app torrentserver
+copy_app mediaserver
 
-[ -d "$MS_REPO" ] || fatal "$MS_REPO doesn't exist"
-[ -d "$TS_REPO" ] || fatal "$TS_REPO doesn't exist"
-
-mkdir -p $PWD/conf.d/{torrentserver,mediaserver}
-
-cd $MS_REPO
-cp conf.d/* $REPO/conf.d/torrentserver
-cp -R overlay $REPO
-
-cd $TS_REPO
-cp conf.d/* $REPO/conf.d/mediaserver
-cp -R overlay $REPO
-
-cd $REPO
 cp -R build-overlay/* .
 
