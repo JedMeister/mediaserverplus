@@ -1,3 +1,0 @@
-#!/bin/bash
-
-clamdscan -v --stdout --move /srv/storage/quarantine $1 >> /var/log/rtorrent/clamav.log
