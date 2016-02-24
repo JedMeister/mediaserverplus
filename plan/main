@@ -20,3 +20,15 @@ rtorrent
 tmux
 mediainfo
 libav-tools
+
+sabnzbdplus
+
+python-pip
+python-cheetah /* couchpotato/sickrage/etc */
+python-openssl
+
+build-essential
+python-dev
+libssl-dev
+libffi-dev
+

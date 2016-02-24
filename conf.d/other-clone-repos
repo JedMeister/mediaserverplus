@@ -1,0 +1,14 @@
+#!/bin/bash -ex
+
+GIT_URL="https://github.com"
+INSTALL_DIR='/opt'
+
+clone() {
+    git clone --depth 1 ${GIT_URL}/$1 ${INSTALL_DIR}/$2 
+}
+
+clone mrkipling/maraschino.git maraschino
+clone RuudBurger/CouchPotatoServer.git couchpotato
+clone SickRage/SickRage.git sickrage
+clone rembo10/headphones.git headphones
+
