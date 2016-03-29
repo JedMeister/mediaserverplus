@@ -9,71 +9,87 @@ MEDIA_HOME=$INST_DIR/media-server
 MEDIA_USER=media
 
 #create user for other software
-#mkdir -p $MEDIA_HOME
-#useradd --user-group --system --home $MEDIA_HOME --shell /bin/false --groups users,rtorrent $MEDIA_USER
-#chown -R $MEDIA_USER:$MEDIA_USER $MEDIA_HOME
+mkdir -p $MEDIA_HOME
+useradd --user-group --system --home $MEDIA_HOME --shell /bin/false --groups users $MEDIA_USER
+chown -R $MEDIA_USER:$MEDIA_USER $MEDIA_HOME
 
 # sabnzbd
-sed -i 's/USER=.*/USER="$MEDIA_USER"/g' /etc/default/sabnzbdplus 
-sed -i 's/HOST=.*/HOST=0.0.0.0/g' /etc/default/sabnzbdplus
-sed -i 's/PORT=.*/PORT=8080/g' /etc/default/sabnzbdplus
+DEFAULT=/etc/default/sabnzbdplus
+sed -i "s|USER=.*|USER=\"$MEDIA_USER\"|g" $DEFAULT
+sed -i "s|HOST=.*|HOST=0.0.0.0|g" $DEFAULT
+sed -i "s|PORT=.*|PORT=8080|g" $DEFAULT
 update-rc.d sabnzbdplus defaults
 
-# Marichino
-MA_INST=$INST_DIR/maraschino
-cp $MA_INST/initd /etc/init.d/maraschino
-cp $MA_INST/default /etc/default/maraschino
-chmod a+x /etc/init.d/maraschino
-update-rc.d maraschino defaults
+USER=$MEDIA_USER:root
+RUN=/var/run
+DATA=/var/lib
+CONF=/etc
+
+mkdir_chown() {
+    for ARG; do
+        mkdir -p $ARG
+        chown $USER $ARG
+    done
+}
+
+install_app() {
+    # NAME & NM
+    NAME=$1
+    NM=$2
+
+    DEFAULT=/etc/default/$NAME
+    INIT=/etc/init.d/$NAME
+    RUN_DIR=$RUN/$NAME
+    DATA_DIR=$DATA/$NAME
+    HOME_DIR=$INST_DIR/$NAME
+    CONF_DIR=$CONF/$NAME
+
+    mkdir_chown $RUN_DIR $DATA_DIR $HOME_DIR $CONF_DIR
+
+    INIT_FILES="$HOME_DIR/init/ubuntu $HOME_DIR/runscripts/init.ubuntu 
+        $HOME_DIR/init-scripts/init.ubuntu $HOME_DIR/initd"
+    # couchpotato SickRage headphones & maraschino
+
+    for INIT_FILE in $INIT_FILES; do
+        if [ -f "$INIT_FILE" ]; then
+            INIT_SCRIPT=$INIT_FILE
+            if [ "$NAME" = "maraschino" ]; then
+                cp $HOME_DIR/default $DEFAULT
+                sed -i "/APP_PATH/ s|=.*|= $HOME_DIR|" $DEFAULT
+                sed -i "/RUN_AS/ s|=.*|= $MEDIA_USER|" $DEFAULT
+                sed -i "/PID_FILE/ s|=.*|= $RUN_DIR/$NAME.pid|" $DEFAULT
+            else
+                cat > $DEFAULT <<EOF
+# OPTIONS: ${NM}_USER, ${NM}_HOME, ${NM}_DATA, ${NM}_PIDFILE, PYTHON_BIN, ${NM}_OPTS, SSD_OPTS
+${NM}_USER=$MEDIA_USER
+${NM}_HOME=$HOME_DIR
+${NM}_DATA=$DATA_DIR
+${NM}_PIDFILE=$RUN_DIR/$NAME.pid
+${NM}_OPTS=" --config=$CONF_DIR/config.ini"
+EOF
+            fi
+        fi
+    done
+
+    cp $INIT_SCRIPT $INIT
+    chmod +x $INIT
+   
+    update-rc.d $NAME defaults
+
+    service $NAME start && sleep 10
+    service $NAME stop && sleep 10
+   
+}
+
+install_app maraschino
+
+install_app couchpotato CP
+# port
+
+install_app sickrage SR
+# port
+
+install_app headphones HP
+# port 8181 
+
 ln -s /etc/nginx/sites-available/maraschino-rtorrent /etc/nginx/sites-enabled/maraschino-rtorrent
-
-# CouchPotato & deps
-CP_INST=$INST_DIR/couchpotato
-cp $CP_INST/init/ubuntu /etc/init.d/couchpotato
-cp $CP_INST/init/ubuntu.default /etc/default/couchpotato
-chmod +x /etc/init.d/couchpotato
-update-rc.d couchpotato defaults
-
-#cp couchpotato/init/couchpotato.service /etc/systemd/system/couchpotato.service
-#Update the systemd config file with your user and path to CouchPotato.py
-#systemctl enable couchpotato
-#on port 5050
-
-# SickRage
-SR_INST=$INST_DIR/sickrage
-cat > /etc/default/sickrage <<EOF
-SR_USER=$MEDIA_USER
-SR_HOME=/opt/sickrage
-SR_DATA=/opt/sickrage
-SR_PIDFILE=/var/run/sickrage/sickrage.pid
-SR_OPTS=" --config=/etc/sickrage/config.ini"
-EOF
-chown $MEDIA_USER:root /etc/default/sickrage
-cp $SR_INST/runscripts/init.ubuntu /etc/init.d/sickrage
-chown $MEDIA_USER:root /etc/init.d/sickrage
-chmod +x /etc/init.d/sickrage
-update-rc.d sickrage defaults
-mkdir -p /var/run/sickrage 
-chown $MEDIA_USER:root /var/run/sickrage
-mkdir -p /etc/sickrage/
-chown $MEDIA_USER:root /var/run/sickrage
-#cycle start/stop to create base config.ini
-service sickbeard start && sleep 10
-service sickbeard stop && sleep 10
-
-
-# Headphones
-cat > /etc/default/headphones <<EOF
-# OPTIONS: HP_HOME, HP_USER, HP_DATA, HP_PIDFILE, PYTHON_BIN, HP_OPTS, SSD_OPTS
-HP_HOME=$MEDIA_HOME/headphones
-HP_DATA=$MEDIA_HOME/headphones
-HP_OPTS=" --config=$MEDIA_HOME/headphones/config.ini"
-HP_USER=$MEDIA_USER
-EOF
-cp $INST_DIR/headphones/init-scripts/init.ubuntu /etc/init.d/headphones
-chown $UNAME: /etc/init.d/headphones
-chmod +x /etc/init.d/headphones
-update-rc.d headphones defaults
-
-
-#port 8181 
